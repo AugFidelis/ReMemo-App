@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ReMemo</string>
+    <string name="title_activity_alarm_list_screen">AlarmListScreen</string>
 </resources>
