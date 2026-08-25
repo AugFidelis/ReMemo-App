@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,25 +54,13 @@ import androidx.compose.ui.unit.sp
 import br.com.rememo.R
 import br.com.rememo.ui.theme.ReMemoTheme
 
-class AlarmListScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ReMemoTheme {
-                AlarmListContent()
-            }
-        }
-    }
-}
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlarmListContent(modifier: Modifier = Modifier) {
+fun AlarmListScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             CenterAlignedTopAppBar(
                 colors = topAppBarColors(
@@ -96,35 +85,6 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                     }
                 }
             )
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
-            ) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
-                ) {
-                    NavigationBarItem(
-                        selected = true,
-                        onClick = {
-
-                        },
-                        icon = { Icon(painter = painterResource(R.drawable.alarm_icon), contentDescription = "Alarmes") },
-                        label = { Text("Alarmes") }
-                    )
-
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = {
-
-                        },
-                        icon = { Icon(painter = painterResource(R.drawable.calendar_check_icon), contentDescription = "Lembretes") },
-                        label = { Text("Lembretes") }
-                    )
-                }
-            }
         }
     ) { innerPadding ->
 
@@ -150,7 +110,12 @@ fun AlarmListContent(modifier: Modifier = Modifier) {
                 )
 
                 LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 90.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(alarms) { alarm ->
