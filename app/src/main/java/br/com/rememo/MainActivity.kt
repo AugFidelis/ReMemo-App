@@ -14,19 +14,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import br.com.rememo.ui.theme.ReMemoTheme
 import android.content.Intent
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.rememo.ui.screens.alarms.AlarmListScreen
 import br.com.rememo.ui.screens.reminders.ReminderListScreen
+import br.com.rememo.ui.components.ReMemoBottomBar
+import br.com.rememo.ui.components.ReMemoTopBar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,32 +46,77 @@ class MainActivity : ComponentActivity() {
         setContent {
             ReMemoTheme {
                 val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
 
                 Scaffold(
                     contentWindowInsets = WindowInsets(0.dp),
-                    bottomBar = {
-                        NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                        ) {
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = {
-                                    navController.navigate("alarms")
-                                },
-                                icon = { Icon(painter = painterResource(R.drawable.alarm_icon), contentDescription = "Alarmes") },
-                                label = { Text("Alarmes") }
-                            )
+                    topBar = {
+                        if(currentRoute == "alarms" || currentRoute == "reminders"){
+                            ReMemoTopBar(
+                                actions = {
+                                    IconButton(
+                                        onClick = {
 
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = {
-                                    navController.navigate("reminders")
-                                },
-                                icon = { Icon(painter = painterResource(R.drawable.calendar_check_icon), contentDescription = "Lembretes") },
-                                label = { Text("Lembretes") }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = "Mais opções"
+                                        )
+                                    }
+                                }
                             )
                         }
+                        else{
+                            ReMemoTopBar(
+                                actions = {
+                                    IconButton(
+                                        onClick = {
+
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Aceitar"
+                                        )
+                                    }
+                                },
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = {
+
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Cancelar"
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    },
+                    bottomBar = {
+                        ReMemoBottomBar(
+                            currentRoute = currentRoute,
+                            onAlarmsClick = {
+                                if(currentRoute != "alarms"){
+                                    navController.navigate("alarms"){
+                                        popUpTo("alarms")
+                                        launchSingleTop = true
+                                    }
+                                }
+                            },
+                            onRemindersClick = {
+                                if(currentRoute != "reminders"){
+                                    navController.navigate("reminders"){
+                                        popUpTo("reminders")
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        )
                     }
                 ) { innerPadding ->
                     NavHost(

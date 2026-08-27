@@ -52,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.rememo.R
+import br.com.rememo.ui.components.ReMemoTopBar
 import br.com.rememo.ui.theme.ReMemoTheme
 
 
@@ -60,32 +61,7 @@ import br.com.rememo.ui.theme.ReMemoTheme
 fun AlarmListScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets(0.dp),
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Image(
-                        painter = painterResource(R.drawable.rememo_topbaricon),
-                        contentDescription = "Ícone do app ReMemo",
-                        modifier = Modifier.size(40.dp)
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Mais opções"
-                        )
-                    }
-                }
-            )
-        }
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
 
         Column(
