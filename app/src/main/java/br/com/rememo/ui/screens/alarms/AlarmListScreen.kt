@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,22 +44,64 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.rememo.R
 import br.com.rememo.ui.components.ReMemoTopBar
 import br.com.rememo.ui.theme.ReMemoTheme
+import java.time.DayOfWeek
+import java.time.LocalTime
 
+data class Alarm(
+    val time: LocalTime,
+    val days: Set<DayOfWeek>,
+    val name: String,
+    val confirmationText: String,
+    val enabled: Boolean
+)
+
+fun formatAlarmDays(days: Set<DayOfWeek>): String{
+
+    if (days.isEmpty()) {
+        return "Uma vez"
+    }
+
+    if(days.size == 7){
+        return "Todos os dias"
+    }
+
+    val sortedDays = days.sortedBy { it.value }
+
+    val shortenedDays = sortedDays.map{ dayAbbreviation(it)}
+    return shortenedDays.joinToString(" ")
+}
+
+fun dayAbbreviation(day: DayOfWeek): String{
+    return when (day) {
+        DayOfWeek.MONDAY -> "Seg."
+        DayOfWeek.TUESDAY -> "Ter."
+        DayOfWeek.WEDNESDAY -> "Qua."
+        DayOfWeek.THURSDAY -> "Qui."
+        DayOfWeek.FRIDAY -> "Sex."
+        DayOfWeek.SATURDAY -> "Sáb."
+        DayOfWeek.SUNDAY -> "Dom."
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlarmListScreen(modifier: Modifier = Modifier) {
+fun AlarmListScreen(
+    modifier: Modifier = Modifier,
+    onAddAlarmClick: () -> Unit
+) {
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets(0.dp)
@@ -73,17 +116,87 @@ fun AlarmListScreen(modifier: Modifier = Modifier) {
                 .weight(1f)
                 .fillMaxWidth()
             ) {
-                val alarms = listOf(
-                    "5:30" to "Seg. a Sex.",
-                    "7:00" to "Seg. a Sáb.",
-                    "12:30" to "Todos os dias",
-                    "18:00" to "Seg. a Sex.",
-                    "12:30" to "Todos os dias",
-                    "12:30" to "Todos os dias",
-                    "12:30" to "Todos os dias",
-                    "12:30" to "Todos os dias",
-                    "12:30" to "Todos os dias",
-                )
+                val alarms = remember {
+                    mutableListOf(
+                        Alarm(
+                            time = LocalTime.of(5, 30),
+                            days = setOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.FRIDAY,
+                            ),
+                            name = "",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+
+                        Alarm(
+                            time = LocalTime.of(6, 30),
+                            days = setOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY,
+                                DayOfWeek.FRIDAY,
+                                DayOfWeek.SATURDAY,
+                                DayOfWeek.SUNDAY,
+                            ),
+                            name = "Alarme 1",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+
+                        Alarm(
+                            time = LocalTime.of(7, 30),
+                            days = emptySet(),
+                            name = "Alarme 1",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+
+                        Alarm(
+                            time = LocalTime.of(8, 30),
+                            days = setOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY,
+                                DayOfWeek.FRIDAY,
+                            ),
+                            name = "FJKGHBDSHGBDJGBDKJGBKDJHGBHGBDHGFBKHJSBJBGGKJHSBGJSDBJDSGKJHBFKJGBJHDBGKDHSGBFDG",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+
+                        Alarm(
+                            time = LocalTime.of(9, 30),
+                            days = setOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY,
+                                DayOfWeek.FRIDAY,
+                            ),
+                            name = "Alarme 1",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+
+                        Alarm(
+                            time = LocalTime.of(10, 30),
+                            days = setOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY,
+                                DayOfWeek.FRIDAY,
+                            ),
+                            name = "Alarme 1",
+                            confirmationText = "Texto de confirmação",
+                            enabled = true
+                        ),
+                    )
+                }
 
                 LazyColumn(
                     contentPadding = PaddingValues(
@@ -97,19 +210,35 @@ fun AlarmListScreen(modifier: Modifier = Modifier) {
                     items(alarms) { alarm ->
                         Card(modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
+
+                            .clickable{
+
+                            }
                         ) {
                             Row(modifier = Modifier
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .fillMaxSize(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column() {
-                                    Text(text = alarm.first, fontSize = 32.sp)
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(text = alarm.time.toString(), fontSize = 32.sp)
 
-                                    Text(text = alarm.second, fontSize = 16.sp)
+                                    Text(text = formatAlarmDays(alarm.days),
+                                        fontSize = 14.sp
+                                    )
+
+                                    if(alarm.name.isNotEmpty()){
+                                        Text(text = alarm.name,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
 
-                                Spacer(modifier = Modifier.weight(1f))
+//                                Spacer(modifier = Modifier.weight(1f))
 
                                 Switch(checked = true, onCheckedChange = {
 
@@ -168,9 +297,7 @@ fun AlarmListScreen(modifier: Modifier = Modifier) {
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    FloatingActionButton(onClick = {
-
-                    }) {
+                    FloatingActionButton(onClick = onAddAlarmClick) {
                         Icon(Icons.Default.Add, contentDescription = "Adicionar alarme")
                     }
                 }

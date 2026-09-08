@@ -1,5 +1,6 @@
 package br.com.rememo.ui.components
 
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -7,7 +8,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import br.com.rememo.R
 
 @Composable
@@ -18,7 +21,8 @@ fun ReMemoBottomBar(
 ){
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.primary
+        contentColor = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.height(85.dp)
     ) {
         NavigationBarItem(
             selected = currentRoute == "alarms",

@@ -1,6 +1,7 @@
 package br.com.rememo.ui.screens.reminders
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +41,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -57,6 +63,18 @@ fun ReminderListScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets(0.dp),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+
+                },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Botão de adicionar lembrete"
+                    )
+                }
+        }
     )
     { innerPadding ->
         var selectedTab by remember { mutableIntStateOf(0) }
@@ -136,13 +154,6 @@ fun ReminderListScreen(modifier: Modifier = Modifier) {
 
 //            ---------------------------------------------------------------------------
 
-//            if(selectedTab == 0){
-//                Text("Ativos selecionado")
-//            }
-//            else if(selectedTab == 1){
-//                Text("Concluídos selecionado")
-//            }
-
             val reminders = remember {
                 mutableListOf(
                     Reminder(
@@ -176,7 +187,40 @@ fun ReminderListScreen(modifier: Modifier = Modifier) {
                             "Qua., 19 de ago., 13:00"
                         ),
                         completed = true
-                    )
+                    ),
+
+                    Reminder(
+                        title = "Estudar Kotlin",
+                        dateTime = "Ter., 18 de ago., 19:00",
+                        repeatInterval = "1 hora",
+                        alarms = listOf(
+                            "Ter., 18 de ago., 18:00",
+                            "Ter., 18 de ago., 18:30"
+                        ),
+                        completed = false
+                    ),
+
+                    Reminder(
+                        title = "Estudar Kotlin",
+                        dateTime = "Ter., 18 de ago., 19:00",
+                        repeatInterval = "1 hora",
+                        alarms = listOf(
+                            "Ter., 18 de ago., 18:00",
+                            "Ter., 18 de ago., 18:30"
+                        ),
+                        completed = false
+                    ),
+
+                    Reminder(
+                        title = "Estudar Kotlin",
+                        dateTime = "Ter., 18 de ago., 19:00",
+                        repeatInterval = "1 hora",
+                        alarms = listOf(
+                            "Ter., 18 de ago., 18:00",
+                            "Ter., 18 de ago., 18:30"
+                        ),
+                        completed = false
+                    ),
                 )
             }
 
@@ -184,100 +228,163 @@ fun ReminderListScreen(modifier: Modifier = Modifier) {
                 it.completed == (selectedTab == 1)
             }
 
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = 90.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             ){
-                items(filteredReminders){ reminder ->
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 90.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ){
+                    items(filteredReminders){ reminder ->
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = {
+
+                            }
                         ) {
-                            Text(
-                                text = reminder.title,
-                                fontSize = 22.sp
-                            )
-
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(top = 4.dp)
+//                            modifier = Modifier.padding(16.dp),
+//                            verticalAlignment = Alignment.Top
                             ) {
-                                Surface(
-                                    shape = RoundedCornerShape(50.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(
-                                            horizontal = 8.dp,
-                                            vertical = 2.dp
-                                        ),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.calendar_check_icon),
-                                            contentDescription = "Ícone de lembrete",
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                        )
+                                Box(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .clickable{
 
-                                        Text(
-                                            text = reminder.dateTime,
-                                            fontSize = 14.sp,
-                                            modifier = Modifier.padding(start = 4.dp)
-                                        )
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .border(
+                                                width = 2.dp,
+                                                color = Color.White,
+                                                shape = CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (reminder.completed) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .background(
+                                                        color = Color.White,
+                                                        shape = CircleShape
+                                                    )
+                                            )
+                                        }
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.width(8.dp))
-
-                                Icon(
-                                    painter = painterResource((R.drawable.reminder_repeat)),
-                                    contentDescription = "Ícone de repetir lembrete",
-                                    modifier = Modifier.size(16.dp)
-                                )
-
-
-                                Text(
-                                    text = reminder.repeatInterval,
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(start = 2.dp)
-                                )
-                            }
-
-                            reminder.alarms.forEach { alarm ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                Column(
+                                    modifier = Modifier.padding(top = 18.dp, bottom = 18.dp)
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.alarm_icon),
-                                        contentDescription = "Ícone de alarme",
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                    )
-
                                     Text(
-                                        text = alarm,
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.padding(start = 4.dp)
+                                        text = reminder.title,
+                                        fontSize = 20.sp
                                     )
-                                }
 
-                                //Spacer(modifier = Modifier.height(4.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(50.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(
+                                                    horizontal = 8.dp,
+                                                    vertical = 2.dp
+                                                ),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.calendar_check_icon),
+                                                    contentDescription = "Ícone de lembrete",
+                                                    modifier = Modifier
+                                                        .size(16.dp)
+                                                )
+
+                                                Text(
+                                                    text = reminder.dateTime,
+                                                    fontSize = 12.sp,
+                                                    modifier = Modifier.padding(start = 4.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        Icon(
+                                            painter = painterResource((R.drawable.reminder_repeat)),
+                                            contentDescription = "Ícone de repetir lembrete",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+
+
+                                        Text(
+                                            text = reminder.repeatInterval,
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.padding(start = 2.dp)
+                                        )
+                                    }
+
+                                    reminder.alarms.forEach { alarm ->
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.alarm_icon),
+                                                contentDescription = "Ícone de alarme",
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                            )
+
+                                            Text(
+                                                text = alarm,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.padding(start = 4.dp)
+                                            )
+                                        }
+
+                                        //Spacer(modifier = Modifier.height(4.dp))
+                                    }
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0f),
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0f),
+                                    MaterialTheme.colorScheme.background
+                                )
+                            )
+                        )
+                )
             }
         }
     }

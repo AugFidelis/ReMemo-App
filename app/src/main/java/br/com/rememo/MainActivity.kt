@@ -36,6 +36,7 @@ import br.com.rememo.ui.screens.alarms.AlarmListScreen
 import br.com.rememo.ui.screens.reminders.ReminderListScreen
 import br.com.rememo.ui.components.ReMemoBottomBar
 import br.com.rememo.ui.components.ReMemoTopBar
+import br.com.rememo.ui.screens.alarms.EditAlarmScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,25 +99,27 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     bottomBar = {
-                        ReMemoBottomBar(
-                            currentRoute = currentRoute,
-                            onAlarmsClick = {
-                                if(currentRoute != "alarms"){
-                                    navController.navigate("alarms"){
-                                        popUpTo("alarms")
-                                        launchSingleTop = true
+                        if(currentRoute == "alarms" || currentRoute == "reminders"){
+                            ReMemoBottomBar(
+                                currentRoute = currentRoute,
+                                onAlarmsClick = {
+                                    if(currentRoute != "alarms"){
+                                        navController.navigate("alarms"){
+                                            popUpTo("alarms")
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                },
+                                onRemindersClick = {
+                                    if(currentRoute != "reminders"){
+                                        navController.navigate("reminders"){
+                                            popUpTo("reminders")
+                                            launchSingleTop = true
+                                        }
                                     }
                                 }
-                            },
-                            onRemindersClick = {
-                                if(currentRoute != "reminders"){
-                                    navController.navigate("reminders"){
-                                        popUpTo("reminders")
-                                        launchSingleTop = true
-                                    }
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 ) { innerPadding ->
                     NavHost(
@@ -125,11 +128,19 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ){
                         composable("alarms"){
-                            AlarmListScreen()
+                            AlarmListScreen(
+                                onAddAlarmClick = {
+                                    navController.navigate("editAlarm")
+                                }
+                            )
                         }
 
                         composable("reminders"){
                             ReminderListScreen()
+                        }
+
+                        composable("editAlarm"){
+                            EditAlarmScreen()
                         }
                     }
                 }
