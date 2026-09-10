@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = {
-
+                                            navController.popBackStack()
                                         }
                                     ) {
                                         Icon(
