@@ -28,15 +28,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHost
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import br.com.rememo.ui.screens.alarms.AlarmListScreen
 import br.com.rememo.ui.screens.reminders.ReminderListScreen
 import br.com.rememo.ui.components.ReMemoBottomBar
 import br.com.rememo.ui.components.ReMemoTopBar
 import br.com.rememo.ui.screens.alarms.EditAlarmScreen
+import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,7 +133,12 @@ class MainActivity : ComponentActivity() {
                         composable("alarms"){
                             AlarmListScreen(
                                 onAddAlarmClick = {
-                                    navController.navigate("editAlarm")
+                                    val now = LocalTime.now()
+                                    navController.navigate("editAlarm/${now.hour}/${now.minute}")
+                                },
+
+                                onAlarmClick = { alarm ->
+                                    navController.navigate("editAlarm/${alarm.time.hour}/${alarm.time.minute}")
                                 }
                             )
                         }
@@ -139,8 +147,20 @@ class MainActivity : ComponentActivity() {
                             ReminderListScreen()
                         }
 
-                        composable("editAlarm"){
-                            EditAlarmScreen()
+                        composable(
+                            route = "editAlarm/{hour}/{minute}",
+                            arguments = listOf(
+                                navArgument("hour"){ type = NavType.IntType },
+                                navArgument("minute"){ type = NavType.IntType }
+                            )
+                        ){ backStackEntry ->
+                            val hour = backStackEntry.arguments?.getInt("hour") ?: LocalTime.now().hour
+                            val minute = backStackEntry.arguments?.getInt("minute") ?: LocalTime.now().minute
+
+                            EditAlarmScreen(
+                                initialHour = hour,
+                                initialMinute = minute
+                            )
                         }
                     }
                 }

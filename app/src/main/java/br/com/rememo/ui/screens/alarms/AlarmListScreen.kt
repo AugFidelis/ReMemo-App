@@ -100,7 +100,8 @@ fun dayAbbreviation(day: DayOfWeek): String{
 @Composable
 fun AlarmListScreen(
     modifier: Modifier = Modifier,
-    onAddAlarmClick: () -> Unit
+    onAddAlarmClick: () -> Unit,
+    onAlarmClick: (Alarm) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -212,7 +213,7 @@ fun AlarmListScreen(
                             .fillMaxWidth()
 
                             .clickable{
-
+                                onAlarmClick(alarm)
                             }
                         ) {
                             Row(modifier = Modifier
