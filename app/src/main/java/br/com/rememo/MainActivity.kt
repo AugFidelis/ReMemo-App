@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import br.com.rememo.ui.theme.ReMemoTheme
 import android.content.Intent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -38,10 +39,14 @@ import br.com.rememo.ui.screens.alarms.AlarmListScreen
 import br.com.rememo.ui.screens.reminders.ReminderListScreen
 import br.com.rememo.ui.components.ReMemoBottomBar
 import br.com.rememo.ui.components.ReMemoTopBar
+import br.com.rememo.ui.screens.alarms.AlarmViewModel
 import br.com.rememo.ui.screens.alarms.EditAlarmScreen
 import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
+
+    private val alarmViewModel: AlarmViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -67,34 +72,6 @@ class MainActivity : ComponentActivity() {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
                                             contentDescription = "Mais opções"
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                        else{
-                            ReMemoTopBar(
-                                actions = {
-                                    IconButton(
-                                        onClick = {
-
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Check,
-                                            contentDescription = "Aceitar"
-                                        )
-                                    }
-                                },
-                                navigationIcon = {
-                                    IconButton(
-                                        onClick = {
-                                            navController.popBackStack()
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = "Cancelar"
                                         )
                                     }
                                 }
@@ -132,13 +109,13 @@ class MainActivity : ComponentActivity() {
                     ){
                         composable("alarms"){
                             AlarmListScreen(
+                                viewModel = alarmViewModel,
                                 onAddAlarmClick = {
-                                    val now = LocalTime.now()
-                                    navController.navigate("editAlarm/${now.hour}/${now.minute}")
+                                    navController.navigate("editAlarm")
                                 },
 
                                 onAlarmClick = { alarm ->
-                                    navController.navigate("editAlarm/${alarm.time.hour}/${alarm.time.minute}")
+                                    navController.navigate("editAlarm?alarmId=${alarm.id}")
                                 }
                             )
                         }
@@ -148,18 +125,21 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(
-                            route = "editAlarm/{hour}/{minute}",
+                            route = "editAlarm?alarmId={alarmId}",
                             arguments = listOf(
-                                navArgument("hour"){ type = NavType.IntType },
-                                navArgument("minute"){ type = NavType.IntType }
+                                navArgument("alarmId"){
+                                    type = NavType.StringType
+                                    nullable = true
+                                    defaultValue = null
+                                }
                             )
                         ){ backStackEntry ->
-                            val hour = backStackEntry.arguments?.getInt("hour") ?: LocalTime.now().hour
-                            val minute = backStackEntry.arguments?.getInt("minute") ?: LocalTime.now().minute
+                            val alarmId = backStackEntry.arguments?.getString("alarmId")
 
                             EditAlarmScreen(
-                                initialHour = hour,
-                                initialMinute = minute
+                                alarmId = alarmId,
+                                viewModel = alarmViewModel,
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
                     }
