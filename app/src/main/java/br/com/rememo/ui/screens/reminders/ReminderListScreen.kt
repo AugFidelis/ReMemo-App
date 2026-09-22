@@ -74,6 +74,22 @@ fun ReminderListScreen(modifier: Modifier = Modifier) {
                         contentDescription = "Botão de adicionar lembrete"
                     )
                 }
+        },
+        topBar = {
+            ReMemoTopBar(
+                actions = {
+                    IconButton(
+                        onClick = {
+
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções"
+                        )
+                    }
+                }
+            )
         }
     )
     { innerPadding ->

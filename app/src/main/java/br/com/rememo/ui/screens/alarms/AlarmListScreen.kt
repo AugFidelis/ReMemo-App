@@ -35,6 +35,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -43,14 +44,20 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,9 +113,29 @@ fun AlarmListScreen(
     onAddAlarmClick: () -> Unit,
     onAlarmClick: (Alarm) -> Unit
 ) {
+    var selectedAlarm by remember{ mutableStateOf<Alarm?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets(0.dp)
+        contentWindowInsets = WindowInsets(0.dp),
+        topBar = {
+            ReMemoTopBar(
+                actions = {
+                    IconButton(
+                        onClick = {
+
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções"
+                        )
+                    }
+                }
+            )
+        }
     ) { innerPadding ->
 
         Column(
@@ -165,8 +192,85 @@ fun AlarmListScreen(
                                 Switch(
                                     checked = alarm.enabled,
                                     onCheckedChange = { isChecked ->
-                                        viewModel.toggleAlarm(alarm.id, isChecked)
+                                        if(isChecked){
+                                            viewModel.toggleAlarm(alarm.id, true)
+                                        }
+                                        else if(alarm.days.isEmpty()){
+                                            viewModel.toggleAlarm(alarm.id, false)
+                                        }
+                                        else{
+                                            selectedAlarm = alarm
+                                        }
                                     }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                selectedAlarm?.let{ alarm ->
+                    ModalBottomSheet(
+                        onDismissRequest = {
+                            selectedAlarm = null
+                        },
+                        sheetState = sheetState
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 32.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            val nextDate = alarm.days.minByOrNull { it.value }
+                            Card(
+                                onClick = {
+                                    viewModel.toggleAlarm(alarm.id, false)
+                                    selectedAlarm = null
+
+                                    //TODO: Adicionar lógica real de desligar em apenas um dia
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Desativar uma vez em ${nextDate?.name ?: "próximo dia"}",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            Card(
+                                onClick = {
+                                    viewModel.toggleAlarm(alarm.id, false)
+                                    selectedAlarm = null
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Desativar o alarme recorrente",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Card(
+                                onClick = { selectedAlarm = null },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Cancelar",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }

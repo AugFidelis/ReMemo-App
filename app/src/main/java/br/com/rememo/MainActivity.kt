@@ -14,6 +14,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import br.com.rememo.ui.theme.ReMemoTheme
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -60,26 +67,30 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     contentWindowInsets = WindowInsets(0.dp),
-                    topBar = {
-                        if(currentRoute == "alarms" || currentRoute == "reminders"){
-                            ReMemoTopBar(
-                                actions = {
-                                    IconButton(
-                                        onClick = {
-
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreVert,
-                                            contentDescription = "Mais opções"
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    },
+//                    topBar = {
+//                        if(currentRoute == "alarms" || currentRoute == "reminders"){
+//                            ReMemoTopBar(
+//                                actions = {
+//                                    IconButton(
+//                                        onClick = {
+//
+//                                        }
+//                                    ) {
+//                                        Icon(
+//                                            imageVector = Icons.Default.MoreVert,
+//                                            contentDescription = "Mais opções"
+//                                        )
+//                                    }
+//                                }
+//                            )
+//                        }
+//                    },
                     bottomBar = {
-                        if(currentRoute == "alarms" || currentRoute == "reminders"){
+                        AnimatedVisibility(
+                            visible = (currentRoute == "alarms" || currentRoute == "reminders"),
+                            enter = slideInVertically(initialOffsetY = {it}) + fadeIn(),
+                            exit = slideOutVertically(targetOffsetY = {it}) + fadeOut()
+                        ) {
                             ReMemoBottomBar(
                                 currentRoute = currentRoute,
                                 onAlarmsClick = {
@@ -105,7 +116,31 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = "alarms",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(300)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(300)
+                            )
+                        },
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(300)
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(300)
+                            )
+                        }
                     ){
                         composable("alarms"){
                             AlarmListScreen(

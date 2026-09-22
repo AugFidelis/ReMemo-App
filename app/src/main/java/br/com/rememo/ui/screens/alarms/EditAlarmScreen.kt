@@ -1,5 +1,6 @@
 package br.com.rememo.ui.screens.alarms
 
+import android.widget.Space
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -25,6 +26,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -70,6 +72,22 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import br.com.rememo.ui.components.ReMemoTopBar
 import java.time.DayOfWeek
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+
+fun dayFullName(day: DayOfWeek): String {
+    return when (day) {
+        DayOfWeek.MONDAY -> "Segunda-feira"
+        DayOfWeek.TUESDAY -> "Terça-feira"
+        DayOfWeek.WEDNESDAY -> "Quarta-feira"
+        DayOfWeek.THURSDAY -> "Quinta-feira"
+        DayOfWeek.FRIDAY -> "Sexta-feira"
+        DayOfWeek.SATURDAY -> "Sábado"
+        DayOfWeek.SUNDAY -> "Domingo"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,7 +197,7 @@ fun TimePickerCard(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun EditAlarmScreen(
     alarmId: String? = null,
@@ -189,10 +207,32 @@ fun EditAlarmScreen(
     val existingAlarm = viewModel.getAlarmById(alarmId)
     val isEditing = (existingAlarm != null)
 
+    val mondayToFriday = setOf(
+        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY, DayOfWeek.FRIDAY
+    )
+
     var selectedHour by remember { mutableIntStateOf(existingAlarm?.time?.hour ?: LocalTime.now().hour) }
     var selectedMinute by remember { mutableIntStateOf(existingAlarm?.time?.minute ?: LocalTime.now().minute) }
     var selectedRepeatOption by remember {
-        mutableStateOf(if(existingAlarm != null) formatAlarmDays(existingAlarm.days) else "Uma vez")
+        mutableStateOf(when {
+            existingAlarm == null -> "Uma vez"
+            existingAlarm.days.isEmpty() -> "Uma vez"
+            existingAlarm.days.size == 7 -> "Diariamente"
+            existingAlarm.days == mondayToFriday -> "Segunda a Sexta"
+            else -> "Personalizado"
+        })
+    }
+    var selectedCustomDays by remember {
+        mutableStateOf<Set<DayOfWeek>>(
+            if (existingAlarm != null &&
+                existingAlarm.days.isNotEmpty() &&
+                existingAlarm.days.size != 7 &&
+                existingAlarm.days != mondayToFriday)
+                existingAlarm.days
+            else
+                emptySet()
+        )
     }
     var alarmName by remember { mutableStateOf(existingAlarm?.name ?: "") }
     var confirmationText by remember { mutableStateOf(existingAlarm?.confirmationText ?: "") }
@@ -206,6 +246,11 @@ fun EditAlarmScreen(
     val confirmationFocusRequester = remember { FocusRequester() }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showCustomDaysSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
 
     Scaffold(
         topBar = {
@@ -219,6 +264,7 @@ fun EditAlarmScreen(
                                     DayOfWeek.MONDAY,  DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
                                     DayOfWeek.THURSDAY, DayOfWeek.FRIDAY
                                 )
+                                "Personalizado" -> selectedCustomDays
                                 else -> emptySet()
                             }
 
@@ -328,10 +374,12 @@ fun EditAlarmScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-//                                    .clip(RoundedCornerShape(12.dp))
                                         .background(if(isSelected) Color(0xFF2E2D38) else Color.Transparent)
                                         .clickable {
                                             selectedRepeatOption = option
+                                            if (option == "Personalizado") {
+                                                showCustomDaysSheet = true
+                                            }
                                         }
                                         .padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -345,6 +393,23 @@ fun EditAlarmScreen(
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
                                     Text(text = option)
+
+                                    if (option == "Personalizado") {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        if (selectedCustomDays.isNotEmpty()) {
+                                            Text(
+                                                text = formatAlarmDays(selectedCustomDays),
+                                                fontSize = 10.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "Personalizar dias",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -516,12 +581,116 @@ fun EditAlarmScreen(
                             onClick = {
                                 showDeleteDialog = false
                             }
-                        ) {
+                         ) {
                             Text("Cancelar")
                         }
                     }
                 )
             }
+        }
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    fun closeCustomDaysSheet() {
+        val newRepeatOption = when {
+            selectedCustomDays.isEmpty() -> "Uma vez"
+            selectedCustomDays.size == 7 -> "Diariamente"
+            selectedCustomDays == mondayToFriday -> "Segunda a Sexta"
+            else -> "Personalizado"
+        }
+
+        selectedRepeatOption = newRepeatOption
+
+        if (newRepeatOption != "Personalizado") {
+            selectedCustomDays = emptySet()
+        }
+
+        showCustomDaysSheet = false
+    }
+
+    if (showCustomDaysSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { closeCustomDaysSheet() },
+            sheetState = sheetState
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { closeCustomDaysSheet() }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Voltar"
+                    )
+                }
+                Text(
+                    text = "Personalizar",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 48.dp),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                DayOfWeek.entries.forEach { day ->
+                    val isChecked = day in selectedCustomDays
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedCustomDays = if (isChecked) {
+                                    selectedCustomDays - day
+                                } else {
+                                    selectedCustomDays + day
+                                }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = dayFullName(day))
+
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = Color.White,
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isChecked) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .background(
+                                            color = Color.White,
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(210.dp))
         }
     }
 }
